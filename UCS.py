@@ -20,6 +20,7 @@ class UCS:
                 grid[int(step[1])][int(step[0])] = 1
 
         paths = []
+
         for j in range(30*30):
             paths.append([0,0])
         
@@ -58,8 +59,8 @@ class UCS:
                             cost[current[1]][beside[0] + current[0]] -= currentCost
                             queue.append([beside[0] + current[0], current[1]])
                                 
-            neighbours2 = [[0, -1], [0, 1]]
-            for beside in neighbours2:
+            besides2 = [[0, -1], [0, 1]]
+            for beside in besides2:
                     if beside[1] + current[1] >= 0 and visited[beside[1] + current[1]][current[0]] == 0 and beside[1] + current[1] < 30:
                         if grid[beside[1] + current[1]][current[0]] != 1:
                             paths[(current[0])*30 + beside[1] + current[1]] = [current[0], current[1]]
