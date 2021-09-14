@@ -23,6 +23,12 @@ class BFS:
             visited.append(current)
 
             if current == target:
+                bestPath = [target]
+                while target != start:
+                    for step in path:
+                        if step[1] == target:
+                            target = step[0]
+                            bestPath.insert(0, step[0])
                 break
             
             besides = [[1, 0], [-1, 0], [0, 1], [0, -1]]
@@ -35,12 +41,6 @@ class BFS:
                                 queue.append(nextCell)
                                 path.append([current, nextCell])
 
-        bestPath = [target]
-        while target != start:
-            for step in path:
-                if step[1] == target:
-                    target = step[0]
-                    bestPath.insert(0, step[0])
          
         for step in bestPath:
             pygame.draw.rect(self.app.screen, (107,107,107), (step[0] * self.app.cellWidth + indent//2, step[1] * self.app.cellHeight + indent//2, self.app.cellWidth, self.app.cellHeight), 2)

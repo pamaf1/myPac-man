@@ -49,7 +49,7 @@ class UCS:
                         saveCur[0] = paths[saveCur[0] * 30 + saveCur[1]][0]
                         saveCur[1] = paths[saveCur[0] * 30 + saveCur[1]][1]
                         bestPath.append([saveCur[0], saveCur[1]])
-
+                        
             besides = [[1, 0], [-1, 0]]
             for beside in besides:
                  if beside[0] + current[0] >= 0 and visited[current[1]][beside[0] + current[0]] == 0 and beside[0] + current[0] < 28:
