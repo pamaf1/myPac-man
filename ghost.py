@@ -2,15 +2,16 @@ import pygame
 import random
 from set import *
 vec = pygame.math.Vector2
+from Astar import *
 
 
 class Ghost():
     def __init__(self, app, coord, number):
         self.app = app
+        self.aStar = Astar(None, None)
         self.gridCoord = coord
         self.ghostStartCoord = [coord.x, coord.y]
         self.pixCoord = self.getPixCoord()
-
         self.number = number
         self.ghostDirection = vec(0,0)
         self.mode = self.ghostMode()
@@ -19,7 +20,7 @@ class Ghost():
         self.speed = 1
 
     def update(self):
-        self.goal = self.ghostGoat()
+        self.goal = self.set_target()
         if self.goal != self.gridCoord:
             self.pixCoord += self.ghostDirection* self.speed
             if self.inGridMove():
@@ -63,7 +64,7 @@ class Ghost():
 
     def move(self):
         if self.mode == "random":
-            self.ghostDirection = self.ghostRandomMove()
+            self.ghostDirection = self.get_path_direction(self.goal)
         if self.mode == "speedy":
              self.ghostDirection = self.ghostRandomMove()
 
@@ -91,5 +92,24 @@ class Ghost():
                 break
         return vec(x_dir, y_dir)
 
+    def set_target(self):
+        return self.app.player.gridCoord
+
+    def get_path_direction(self, target):
+        next_cell = self.find_next_cell_in_path(target)
+        xdir = next_cell[1] - self.gridCoord[0]
+        ydir = next_cell[0] - self.gridCoord[1]
+        return vec(xdir, ydir)
+
+    def find_next_cell_in_path(self, target):
+        grid = [[0 for x in range(28)] for x in range(30)]
+        for step in self.app.lvlWalls:
+            if step[0] < 28 and step[1] < 30:
+                grid[int(step[1])][int(step[0])] = 1
+        path = self.aStar.astar(grid, (int(self.gridCoord[1]), int(self.gridCoord[0])), (int(target[1]), int(target[0])))
+        return path[1]
+
     def ghostMode(self):
             return "random"
+
+    

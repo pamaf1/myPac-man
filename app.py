@@ -6,6 +6,7 @@ from ghost import *
 from BFS import *
 from DFS import *
 from UCS import *
+from Astar import *
 from lvl import *
 import time
 
@@ -29,6 +30,7 @@ class App:
         self.bfs = BFS(self)
         self.dfs = DFS(self)
         self.ucs = UCS(self)
+        self.aStar = Astar(None, None)
         self.createMap() 
         self.player = Player(self, vec(self.playerCoord))
         self.clock = pygame.time.Clock()
@@ -71,32 +73,32 @@ class App:
 
         # self.wallsImage = self.map.createRandomLvl(13, 7)
 
-        # with open(f"{self.wallsImage}", "r") as file:
-        #     for y, line in enumerate(file):
-        #         for x, element in enumerate(line):
-        #             if element == "t":
-        #                 self.lvlWalls.append(vec(x, y))
-        #             elif element == "p":
-        #                 self.points.append(vec(x, y))
-        #             elif element == "P":
-        #                 self.playerCoord = [x, y]
-        #             elif element in ["1", "2", "3", "4"]:
-        #                 self.ghostsCoord.append([x, y])
-        
-        for y in range(30):
-            for x in range(28):
-                num = random.randint(0,2)
-                if y == 0 or y == 29  or x == 0 or x == 27:
-                    self.lvlWalls.append(vec(x,y))
-                elif y == 21 and x == 15:
-                    self.playerCoord = [x, y]
-                elif y == 15 and x >= 12 and x <= 15:
-                    self.ghostsCoord.append([x, y])
-                else:
-                    if num == 1:
-                        self.lvlWalls.append(vec(x,y))
-                    else:
+        with open("randomWalls.txt", "r") as file:
+            for y, line in enumerate(file):
+                for x, element in enumerate(line):
+                    if element == "t":
+                        self.lvlWalls.append(vec(x, y))
+                    elif element == "p":
                         self.points.append(vec(x, y))
+                    elif element == "P":
+                        self.playerCoord = [x, y]
+                    elif element in ["1", "2", "3", "4"]:
+                        self.ghostsCoord.append([x, y])
+        
+        # for y in range(30):
+        #     for x in range(28):
+        #         num = random.randint(0,2)
+        #         if y == 0 or y == 29  or x == 0 or x == 27:
+        #             self.lvlWalls.append(vec(x,y))
+        #         elif y == 21 and x == 15:
+        #             self.playerCoord = [x, y]
+        #         elif y == 15 and x >= 12 and x <= 22:
+        #             self.ghostsCoord.append([x, y])
+        #         else:
+        #             if num == 1:
+        #                 self.lvlWalls.append(vec(x,y))
+        #             else:
+        #                 self.points.append(vec(x, y))
 
     def updateMap(self):
         for walls in self.lvlWalls:
@@ -168,14 +170,14 @@ class App:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-                if event.key == pygame.K_LEFT:
-                    self.player.playerMove(vec(-1,0))
-                if event.key == pygame.K_RIGHT:
-                    self.player.playerMove(vec(1,0))
-                if event.key == pygame.K_UP:
-                    self.player.playerMove(vec(0,-1))
-                if event.key == pygame.K_DOWN:
-                    self.player.playerMove(vec(0,1))
+                # if event.key == pygame.K_LEFT:
+                #     self.player.playerMove(vec(-1,0))
+                # if event.key == pygame.K_RIGHT:
+                #     self.player.playerMove(vec(1,0))
+                # if event.key == pygame.K_UP:
+                #     self.player.playerMove(vec(0,-1))
+                # if event.key == pygame.K_DOWN:
+                #     self.player.playerMove(vec(0,1))
                 if event.key == pygame.K_z:
                     self.index += 1
                     if self.index == 4:
@@ -275,6 +277,27 @@ class App:
                 self.bfs.BFS([int(self.player.gridCoord.x), int(self.player.gridCoord.y)], [int(ghost.gridCoord.x), int(ghost.gridCoord.y)]) 
             self.showText(self.screen, f'Время: {(time.time() - start)}', [
                        370, 650], "bremen bd bt", 20, (192, 192, 192))
+                       
+            # grid = [[0 for x in range(28)] for x in range(30)]
+            # for step in self.lvlWalls:
+            #     if step[0] < 28 and step[1] < 30:
+            #         grid[int(step[1])][int(step[0])] = 1
+
+            # path = self.aStar.astar(grid, (int(self.player.gridCoord.y), int(self.player.gridCoord.x)), (int(self.points[len(self.points)-1][1]), int(self.points[len(self.points)-1][0])))
+            # for step in path:
+            #     pygame.draw.rect(self.screen, (167,167,0), (step[1] * self.cellWidth + indent//2, step[0] * self.cellHeight + indent//2, self.cellWidth, self.cellHeight), 2)
+
+            # grid = [[0 for x in range(28)] for x in range(30)]
+            # for step in self.lvlWalls:
+            #     if step[0] < 28 and step[1] < 30:
+            #         grid[int(step[1])][int(step[0])] = 1
+
+            # # path = []
+            # for ghost in self.ghosts:
+            #     path = self.aStar.astar(grid, (int(self.player.gridCoord.y), int(self.player.gridCoord.x)), (int(ghost.gridCoord.y), int(ghost.gridCoord.x)))
+            #     for step in path:
+            #         pygame.draw.rect(self.screen, (167,167,0), (step[1] * self.cellWidth + indent//2, step[0] * self.cellHeight + indent//2, self.cellWidth, self.cellHeight), 2)
+        
         elif self.index == 2:
             start = time.time()
             for ghost in self.ghosts:
@@ -287,8 +310,7 @@ class App:
                 self.ucs.UCS([int(self.player.gridCoord.x), int(self.player.gridCoord.y)], [int(ghost.gridCoord.x), int(ghost.gridCoord.y)])
             self.showText(self.screen, f'Время: {(time.time() - start)}', [
                        370, 650], "bremen bd bt", 20, (192, 192, 192))
-
-
     
+
 app = App()
 app.run()

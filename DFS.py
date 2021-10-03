@@ -24,6 +24,7 @@ class DFS:
             current = queue[len(queue)-1]
             queue.remove(queue[len(queue)-1])
             visited.append(current)
+            
             if current == target:
                 bestPath = [target]
                 while target != start:
