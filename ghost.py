@@ -2,20 +2,21 @@ import pygame
 import random
 from set import *
 vec = pygame.math.Vector2
-from Astar import *
-
+# from Mini import *
+from collections import deque 
+import numpy as np
+# from MinimaxEcpectimax import *
 
 class Ghost():
     def __init__(self, app, coord, number):
         self.app = app
-        self.aStar = Astar(None, None)
+        # self.mini = Mini(None, None)
         self.gridCoord = coord
         self.ghostStartCoord = [coord.x, coord.y]
         self.pixCoord = self.getPixCoord()
         self.number = number
         self.ghostDirection = vec(0,0)
         self.mode = self.ghostMode()
-
         self.goal = None
         self.speed = 1
 
@@ -63,9 +64,9 @@ class Ghost():
         return False
 
     def move(self):
-        if self.mode == "random":
-            self.ghostDirection = self.get_path_direction(self.goal)
         if self.mode == "speedy":
+            self.ghostDirection = self.get_path_direction(self.goal)
+        if self.mode == "random":
              self.ghostDirection = self.ghostRandomMove()
 
     def ghostRandomMove(self):
@@ -97,19 +98,26 @@ class Ghost():
 
     def get_path_direction(self, target):
         next_cell = self.find_next_cell_in_path(target)
-        xdir = next_cell[1] - self.gridCoord[0]
-        ydir = next_cell[0] - self.gridCoord[1]
-        return vec(xdir, ydir)
+        # xdir = next_cell[1] - self.gridCoord[0]
+        # ydir = next_cell[0] - self.gridCoord[1]
+        # xdir = next_cell[0] - self.gridCoord[0]
+        # ydir = next_cell[1] - self.gridCoord[1]
+        # return vec(xdir, ydir)
 
     def find_next_cell_in_path(self, target):
         grid = [[0 for x in range(28)] for x in range(30)]
         for step in self.app.lvlWalls:
             if step[0] < 28 and step[1] < 30:
                 grid[int(step[1])][int(step[0])] = 1
-        path = self.aStar.astar(grid, (int(self.gridCoord[1]), int(self.gridCoord[0])), (int(target[1]), int(target[0])))
-        return path[1]
+        # path = self.mini.mini(grid, (int(self.gridCoord[1]), int(self.gridCoord[0])), (int(target[1]), int(target[0])))
+        # path = self.Alg([int(self.gridCoord[0]), int(self.gridCoord[1])], [int(target[0]), int(target[1])])
+        #return path[1]
 
     def ghostMode(self):
+        if self.number == 0 or self.number == 2:
             return "random"
+        else:
+         return "speedy"
+
 
     

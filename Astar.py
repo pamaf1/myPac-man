@@ -3,6 +3,7 @@ vec = pygame.math.Vector2
 from set import *
 
 class Astar:
+    
     def __init__(self, beforeCoordinate, coordinate):
         self.beforeCoordinate = beforeCoordinate
         self.coordinate = coordinate

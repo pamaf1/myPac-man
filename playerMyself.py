@@ -8,7 +8,7 @@ from Astar import *
 class Player():
     def __init__(self, app, coord):
         self.app = app
-        self.aStar = Astar()
+        self.aStar = Astar(None, None)
         self.gridCoord = coord
         self.playerStartCoord = [coord.x, coord.y]
         self.pixCoord = self.getPixCoord()

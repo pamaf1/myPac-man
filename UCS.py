@@ -68,5 +68,7 @@ class UCS:
                             cost[beside[1] + current[1]][current[0]] -= currentCost
                             queue.append([current[0], beside[1] + current[1]])
 
-        for step in bestPath:
-            pygame.draw.rect(self.app.screen, (127,0,127), (step[0] * self.app.cellWidth + indent//2, step[1] * self.app.cellHeight + indent//2, self.app.cellWidth, self.app.cellHeight), 2)
+        return bestPath
+
+        # for step in bestPath:
+        #     pygame.draw.rect(self.app.screen, (127,0,127), (step[0] * self.app.cellWidth + indent//2, step[1] * self.app.cellHeight + indent//2, self.app.cellWidth, self.app.cellHeight), 2)

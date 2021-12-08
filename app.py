@@ -9,6 +9,8 @@ from UCS import *
 from Astar import *
 from lvl import *
 import time
+import pandas as pd
+import csv
 
 pygame.init()
 
@@ -30,7 +32,7 @@ class App:
         self.bfs = BFS(self)
         self.dfs = DFS(self)
         self.ucs = UCS(self)
-        self.aStar = Astar(None, None)
+        # self.aStar = Astar(None, None)
         self.createMap() 
         self.player = Player(self, vec(self.playerCoord))
         self.clock = pygame.time.Clock()
@@ -72,8 +74,8 @@ class App:
         #     self.wallsImage = self.map.createRandomLvl()
 
         # self.wallsImage = self.map.createRandomLvl(13, 7)
-
-        with open("randomWalls.txt", "r") as file:
+        num = random.randint(1,3)
+        with open(f"walls{num}.txt", "r") as file:
             for y, line in enumerate(file):
                 for x, element in enumerate(line):
                     if element == "t":
@@ -84,6 +86,7 @@ class App:
                         self.playerCoord = [x, y]
                     elif element in ["1", "2", "3", "4"]:
                         self.ghostsCoord.append([x, y])
+
         
         # for y in range(30):
         #     for x in range(28):
@@ -235,10 +238,35 @@ class App:
     def loseEvents(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+            #     FILENAME = "result.csv"
+            #     users = [
+            #         ["False", self.player.Score, "algorithm"],
+            #     ]
+        
+            #     with open(FILENAME, "a", newline="") as file:
+            #         writer = csv.writer(file)
+            #         writer.writerow(users)
+
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                # FILENAME = "result.csv"
+                # users = [
+                #     ["False", self.player.Score, "algorithm"],
+                # ]
+        
+                # with open(FILENAME, "a", newline="") as file:
+                #     writer = csv.writer(file)
+                #     writer.writerow(users)
                 self.resetLevel()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                # FILENAME = "result.csv"
+                # users = [
+                #     ["False", self.player.Score, "algorithm"],
+                # ]
+        
+                # with open(FILENAME, "a", newline="") as file:
+                #     writer = csv.writer(file)
+                #     writer.writerow(users)
                 self.running = False
 
     def loseMenu(self):
@@ -253,11 +281,35 @@ class App:
     def winEvents(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # FILENAME = "result.csv"
+                # users = [
+                #     ["True", self.player.Score, "algorithm"],
+                # ]
+        
+                # with open(FILENAME, "a", newline="") as file:
+                #     writer = csv.writer(file)
+                #     writer.writerow(users)
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.lvlPlay += 1
+                # FILENAME = "result.csv"
+                # users = [
+                #     ["True", self.player.Score, "algorithm"],
+                # ]
+        
+                # with open(FILENAME, "a", newline="") as file:
+                #     writer = csv.writer(file)
+                #     writer.writerow(users)
+                # self.lvlPlay += 1
                 self.resetLevel()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                # FILENAME = "result.csv"
+                # users = [
+                #     ["True", self.player.Score, "algorithm"],
+                # ]
+        
+                # with open(FILENAME, "a", newline="") as file:
+                #     writer = csv.writer(file)
+                #     writer.writerow(users)
                 self.running = False
 
     def winMenu(self):
@@ -313,4 +365,8 @@ class App:
     
 
 app = App()
+# start = time.time()
 app.run()
+# end = (time.time() - start)
+
+# print(end)
