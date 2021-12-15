@@ -2,7 +2,6 @@ import pygame
 import random
 from set import *
 vec = pygame.math.Vector2
-# from Mini import *
 from collections import deque 
 import numpy as np
 # from MinimaxEcpectimax import *
@@ -18,7 +17,7 @@ class Ghost():
         self.ghostDirection = vec(0,0)
         self.mode = self.ghostMode()
         self.goal = None
-        self.speed = 1
+        self.speed = 4
 
     def update(self):
         self.goal = self.set_target()
@@ -100,9 +99,9 @@ class Ghost():
         next_cell = self.find_next_cell_in_path(target)
         # xdir = next_cell[1] - self.gridCoord[0]
         # ydir = next_cell[0] - self.gridCoord[1]
-        # xdir = next_cell[0] - self.gridCoord[0]
-        # ydir = next_cell[1] - self.gridCoord[1]
-        # return vec(xdir, ydir)
+        xdir = next_cell[0] - self.gridCoord[0]
+        ydir = next_cell[1] - self.gridCoord[1]
+        return vec(xdir, ydir)
 
     def find_next_cell_in_path(self, target):
         grid = [[0 for x in range(28)] for x in range(30)]
@@ -110,8 +109,8 @@ class Ghost():
             if step[0] < 28 and step[1] < 30:
                 grid[int(step[1])][int(step[0])] = 1
         # path = self.mini.mini(grid, (int(self.gridCoord[1]), int(self.gridCoord[0])), (int(target[1]), int(target[0])))
-        # path = self.Alg([int(self.gridCoord[0]), int(self.gridCoord[1])], [int(target[0]), int(target[1])])
-        #return path[1]
+        path = self.BFS([int(self.gridCoord[0]), int(self.gridCoord[1])], [int(target[0]), int(target[1])])
+        return path[1]
 
     def ghostMode(self):
         if self.number == 0 or self.number == 2:
@@ -119,5 +118,42 @@ class Ghost():
         else:
          return "speedy"
 
+    def BFS(self, start, target):   
+        grid = [[0 for x in range(28)] for x in range(30)]
+        queue = [start]
+        path = []
+        visited = []
+        for step in self.app.lvlWalls:
+            if step[0] < 28 and step[1] < 30:
+                grid[int(step[1])][int(step[0])] = 1
+
+        while queue:
+            current = queue[0]
+            queue.remove(queue[0])
+            visited.append(current)
+
+            if current == target:
+
+                break
+            
+            besides = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+            for beside in besides:
+                if beside[0] + current[0] >= 0 and beside[0] + current[0] < len(grid[0]):
+                    if beside[1] + current[1] >= 0 and beside[1] + current[1] < len(grid):
+                        nextCell = [beside[0] + current[0], beside[1] + current[1]]
+                        if nextCell not in visited:
+                            if grid[nextCell[1]][nextCell[0]] != 1:
+                                queue.append(nextCell)
+                                path.append([current, nextCell])
+
+         
+        bestPath = [target]
+        while target != start:
+            for step in path:
+                if step[1] == target:
+                    target = step[0]
+                    bestPath.insert(0, step[0])
+
+        return bestPath
 
     

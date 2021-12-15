@@ -15,17 +15,18 @@ class Player():
         self.Score = 0
         self.direction = vec(0,0)
         self.goal = None
-        self.speed = 2
+        self.speed = 10
         self.playerLife = 3
 
-    def update(self):
-        self.goal = self.set_target()
-        if self.goal != self.gridCoord:
-            self.pixCoord += self.direction* self.speed
-            if self.Score % 10 == 0:
-                random.shuffle(self.app.points)
+    def update(self, direction):
+        self.goal = direction
+        if self.Score != 150:
             if self.inGridMove():
                 self.move()
+            self.pixCoord += self.direction * self.speed
+            # if self.Score % 10 == 0:
+            #     random.shuffle(self.app.points)
+
 
         self.gridCoord[0] = (self.pixCoord[0]- indent +
                             self.app.cellWidth//2)//self.app.cellWidth+1
@@ -80,26 +81,55 @@ class Player():
         self.app.points.remove(self.gridCoord)
         self.Score += 1
         if len(self.app.points) == 0 or self.Score == 80:
-            self.app.stage = "win"
+            # self.app.stage = "win"
+            self.app.Lose = False
 
     def move(self):
         self.direction = self.get_path_direction(self.goal)
 
-    def set_target(self):
+    def set_target(self, direction):
         # if self.Score % 2 == 0:
         #     number = random.randint(0,len(self.app.points)-1)
         #     return self.app.points[number]
         # else:
         #     return self.app.points[0]
-        return self.app.points[0]
+
+        return direction
 
     def get_path_direction(self, target):
-        next_cell = self.find_next_cell_in_path(target)
+        # next_cell = self.find_next_cell_in_path(target)
         # xdir = next_cell[1] - self.gridCoord[0]
         # ydir = next_cell[0] - self.gridCoord[1]
         # xdir = next_cell[0] - self.gridCoord[0]
         # ydir = next_cell[1] - self.gridCoord[1]
-        # return vec(xdir, ydir)
+        xdir = 0
+        ydir = 0
+        if target[0] == 1:
+            xdir = 1
+            ydir = 0
+        elif target[1] == 1:
+            xdir = -1
+            ydir = 0
+        elif target[2] == 1:
+            xdir = 0
+            ydir = -1
+        elif target[3] == 1:
+            xdir = 0
+            ydir = 1
+
+        next_cell = [int(xdir + self.gridCoord[0]), int(ydir + self.gridCoord[1])]
+
+        grid = [[0 for x in range(30)] for x in range(30)]
+        for step in self.app.lvlWalls:
+            if step[0] < 30 and step[1] < 30:
+                grid[int(step[1])][int(step[0])] = 1
+        if next_cell[0] < 30 and next_cell[1] < 30:
+            if grid[next_cell[1]][next_cell[0]] != 1:
+                return vec(xdir, ydir)
+            else:
+                return vec(0,0)
+        else:
+            return vec(0,0)
 
     def find_next_cell_in_path(self, target):
         grid = [[0 for x in range(28)] for x in range(30)]
@@ -108,6 +138,7 @@ class Player():
                 grid[int(step[1])][int(step[0])] = 1
         
         # path = self.mini.mini(grid, (int(self.gridCoord[1]), int(self.gridCoord[0])), (int(target[1]), int(target[0])))
-        # path = self.Alg([int(self.gridCoord[0]), int(self.gridCoord[1])], [int(target[0]), int(target[1])])
         # return path[1]
 
+
+    

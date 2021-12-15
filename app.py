@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 vec = pygame.math.Vector2
 from player import *
 from set import *
@@ -10,14 +11,19 @@ from Astar import *
 from lvl import *
 import time
 import pandas as pd
-import csv
+from agent import *
 
 pygame.init()
 
 class App:
     def __init__(self):
         self.screen = pygame.display.set_mode((width, height))
-        self.stage = "start"
+        self.agent = Agent()
+        self.last_reward = 0
+        self.last_best_result = 0
+        self.record = 0
+        self.stage = "play"
+        self.Lose = True
         self.lvlPlay = 1
         self.index = 0
         self.running = True
@@ -37,15 +43,44 @@ class App:
         self.player = Player(self, vec(self.playerCoord))
         self.clock = pygame.time.Clock()
         self.createGhosts()
+
+
+    def get_state(self):
+        image = skimage.color.rgb2gray(pygame.surfarray.array3d(pygame.display.get_surface()))
+        image = skimage.transform.resize(image, (28, 30))
+        return np.array(image).flatten()
     
     def run(self):
         while self.running:
-            if self.stage == "start":
-                self.startMenu()
-            elif self.stage == "play":
+            # if self.stage == "start":
+            #     self.startMenu()
+            if self.stage == "play":
                 self.playEvents()
-                self.playerMoving()
                 self.showObject()
+
+                self.state_old = self.get_state()
+
+                self.final_move = self.agent.get_action(self.state_old)
+
+                reward, game_over, score = self.playerMoving(self.final_move)
+
+                state_new = self.get_state()
+
+                self.agent.train_short_memory(self.state_old, self.final_move, reward, state_new, game_over)
+
+                self.agent.remember(self.state_old, self.final_move, reward, state_new, game_over)
+
+                if game_over == False:
+                    self.resetLevel()
+                    self.agent.n_games += 1
+                    self.agent.train_long_memory()
+                    if score > self.record:
+                        self.record = score
+                        self.agent.model.save()
+
+                    print("Game", self.agent.n_games, 'Score', score, 'Record', self.record)
+
+
             elif self.stage == "lose":
                 self.loseEvents()
                 self.loseMenu()
@@ -74,7 +109,7 @@ class App:
         #     self.wallsImage = self.map.createRandomLvl()
 
         # self.wallsImage = self.map.createRandomLvl(13, 7)
-        num = random.randint(1,3)
+        num = random.randint(1,2)
         with open(f"walls{num}.txt", "r") as file:
             for y, line in enumerate(file):
                 for x, element in enumerate(line):
@@ -131,19 +166,31 @@ class App:
 
         pygame.display.update()
 
-    def playerMoving(self):
-        self.player.update()
+    def playerMoving(self, direction):
+        cur_score = self.player.Score
+        cur_lives = self.player.playerLife
+
+        self.player.update(direction)
+
         for ghost in self.ghosts:
             ghost.update()
-
         for ghost in self.ghosts:
             if ghost.gridCoord == self.player.gridCoord:
                 self.playerLostLife()
 
+        reward = 0
+        if cur_score < self.player.Score:
+            reward = 1
+        if cur_lives > self.player.playerLife:
+            reward = -1
+
+        return reward, self.Lose, self.player.Score
+
+
     def playerLostLife(self):
         self.player.playerLife -= 1
         if self.player.playerLife == 0:
-            self.stage = "lose"
+            self.Lose = False
         else:
             self.player.gridCoord = vec(self.player.playerStartCoord)
             self.player.pixCoord = self.player.getPixCoord()
@@ -203,6 +250,7 @@ class App:
         self.player.gridCoord = vec(self.player.playerStartCoord)
         self.player.pixCoord = self.player.getPixCoord()
         self.player.direction *= 0
+        self.Lose = True
         for ghost in self.ghosts:
             ghost.gridCoord = vec(ghost.ghostStartCoord)
             ghost.pixCoord = ghost.getPixCoord()
@@ -215,20 +263,21 @@ class App:
         # else:
         #     self.wallsImage = "walls.txt"
 
-        self.wallsImage = self.map.createRandomLvl(13, 7)
+        # self.wallsImage = self.map.createRandomLvl(13, 7)
         
         self.playerCoord = None
         self.lvlWalls = []
         self.points = []
         self.ghostsCoord = []
 
-        with open(f"{self.wallsImage}", 'r') as file:
+        num = random.randint(1,2)
+        with open(f"walls{num}.txt", "r") as file:
             for y, line in enumerate(file):
                 for x, element in enumerate(line):
-                    if element == "p":
-                        self.points.append(vec(x, y))
                     if element == "t":
                         self.lvlWalls.append(vec(x, y))
+                    elif element == "p":
+                        self.points.append(vec(x, y))
                     elif element == "P":
                         self.playerCoord = [x, y]
                     elif element in ["1", "2", "3", "4"]:
@@ -238,35 +287,10 @@ class App:
     def loseEvents(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-            #     FILENAME = "result.csv"
-            #     users = [
-            #         ["False", self.player.Score, "algorithm"],
-            #     ]
-        
-            #     with open(FILENAME, "a", newline="") as file:
-            #         writer = csv.writer(file)
-            #         writer.writerow(users)
-
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                # FILENAME = "result.csv"
-                # users = [
-                #     ["False", self.player.Score, "algorithm"],
-                # ]
-        
-                # with open(FILENAME, "a", newline="") as file:
-                #     writer = csv.writer(file)
-                #     writer.writerow(users)
                 self.resetLevel()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                # FILENAME = "result.csv"
-                # users = [
-                #     ["False", self.player.Score, "algorithm"],
-                # ]
-        
-                # with open(FILENAME, "a", newline="") as file:
-                #     writer = csv.writer(file)
-                #     writer.writerow(users)
                 self.running = False
 
     def loseMenu(self):
@@ -281,35 +305,10 @@ class App:
     def winEvents(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # FILENAME = "result.csv"
-                # users = [
-                #     ["True", self.player.Score, "algorithm"],
-                # ]
-        
-                # with open(FILENAME, "a", newline="") as file:
-                #     writer = csv.writer(file)
-                #     writer.writerow(users)
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                # FILENAME = "result.csv"
-                # users = [
-                #     ["True", self.player.Score, "algorithm"],
-                # ]
-        
-                # with open(FILENAME, "a", newline="") as file:
-                #     writer = csv.writer(file)
-                #     writer.writerow(users)
-                # self.lvlPlay += 1
                 self.resetLevel()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                # FILENAME = "result.csv"
-                # users = [
-                #     ["True", self.player.Score, "algorithm"],
-                # ]
-        
-                # with open(FILENAME, "a", newline="") as file:
-                #     writer = csv.writer(file)
-                #     writer.writerow(users)
                 self.running = False
 
     def winMenu(self):
@@ -365,8 +364,8 @@ class App:
     
 
 app = App()
-# start = time.time()
-app.run()
-# end = (time.time() - start)
 
-# print(end)
+app.run()
+
+
+

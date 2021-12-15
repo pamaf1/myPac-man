@@ -11,16 +11,6 @@ data['isWin'] = data['isWin'].astype(int)
 data['time'] = data['time'].astype(float)
 data.info()
 
-# plt.figure(figsize=(8,6))
-# plt.hist(data['score'], color = 'green')
-# plt.xlabel('score')
-# plt.show()
-
-# plt.figure(figsize=(11,6))
-# plt.hist(data['time'], color = 'blue')
-# plt.xlabel('time')
-# plt.show()
-
 print(data.corr())
 
 win = data['isWin']
